@@ -1,89 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Assistant Legacya</title>
-<style>
-body {
-margin: 0;
-font-family: Arial, sans-serif;
-background: url('https://your-background-image.jpg') no-repeat center center fixed;
-background-size: cover;
-}
+  <meta charset="UTF-8">
+  <title>Assistant Legacya</title>
+  <style>
+    #logoAI {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      background: url('https://img.icons8.com/ios-filled/100/ffffff/artificial-intelligence.png') no-repeat center/contain;
+      background-color: #000;
+      border-radius: 50%;
+      z-index: 9999;
+      animation: pulse 2s infinite;
+      cursor: pointer;
+    }
 
-#logoAI {
-position: fixed;
-bottom: 20px;
-right: 20px;
-width: 80px;
-height: 80px;
-background: url('https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png') no-repeat center;
-background-size: contain;
-border-radius: 50%;
-animation: pulse 2s infinite;
-z-index: 9999;
-cursor: pointer;
-}
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
 
-@keyframes pulse {
-0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-70% { transform: scale(1.1); box-shadow: 0 0 15px 10px rgba(255, 255, 255, 0); }
-100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-}
-
-#messageBox {
-position: fixed;
-bottom: 110px;
-right: 20px;
-width: 300px;
-padding: 15px;
-background: rgba(0, 0, 0, 0.6);
-color: white;
-border-radius: 10px;
-font-size: 14px;
-display: none;
-z-index: 9999;
-}
-</style>
+    #dialogue {
+      position: fixed;
+      bottom: 110px;
+      right: 20px;
+      width: 280px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-family: sans-serif;
+      display: none;
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body>
 
-<div id="logoAI" title="Cliquez pour parler à Legacya"></div>
-<div id="messageBox"></div>
+<div id="logoAI" onclick="startSequence()"></div>
+<div id="dialogue">Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.</div>
 
 <script>
-const phrases = [
-"Bonjour, je suis Legacya, votre assistant pour les démarches de carte grise.",
-"Commencez en cliquant sur 'Carte grise / démarches' dans le menu.",
-"Cliquez ensuite sur 'Continuer' sur la page suivante.",
-"Souhaitez-vous faire la démarche vous-même ou être recontacté par un conseiller ?"
-];
+  const messages = [
+    "Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.",
+    "Très bien. Maintenant, cliquez sur le bouton bleu 'Continuer'.",
+    "Souhaitez-vous faire la demande vous-même ou être recontacté par un conseiller ?",
+    "Très bien. Entrez vos informations pour qu’un conseiller vous rappelle."
+  ];
 
-let currentStep = 0;
-const logo = document.getElementById("logoAI");
-const box = document.getElementById("messageBox");
+  let index = 0;
+  let started = false;
 
-function speak(text) {
-const msg = new SpeechSynthesisUtterance(text);
-msg.lang = "fr-FR";
-const voices = window.speechSynthesis.getVoices();
-const maleVoice = voices.find(v => v.lang === "fr-FR" && v.name.toLowerCase().includes("h"));
-if (maleVoice) msg.voice = maleVoice;
-window.speechSynthesis.speak(msg);
-}
+  function startSequence() {
+    if (started) return;
+    started = true;
 
-function showNextMessage() {
-if (currentStep < phrases.length) {
-const message = phrases[currentStep];
-box.style.display = "block";
-box.innerText = message;
-speak(message);
-currentStep++;
-}
-}
+    document.getElementById('dialogue').style.display = "block";
+    speakAndShow();
+  }
 
-logo.addEventListener("click", showNextMessage);
+  function speakAndShow() {
+    const msg = messages[index];
+    document.getElementById('dialogue').innerText = msg;
+    const utterance = new SpeechSynthesisUtterance(msg);
+    utterance.lang = 'fr-FR';
+    speechSynthesis.speak(utterance);
+
+    index++;
+    if (index < messages.length) {
+      setTimeout(speakAndShow, 7000); // attendre 7s avant la suite
+    }
+  }
 </script>
 
 </body>
