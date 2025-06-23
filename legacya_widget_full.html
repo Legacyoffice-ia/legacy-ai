@@ -6,16 +6,16 @@
   <style>
     body {
       margin: 0;
-      background: transparent;
       font-family: Arial, sans-serif;
+      background: transparent;
     }
 
     #logoAI {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       background-image: url('https://zebr-257800.hostingstatic.io/wp-content/uploads/2023/06/L.png');
       background-size: contain;
       background-repeat: no-repeat;
@@ -30,12 +30,13 @@
       50% { transform: scale(1.1); opacity: 0.8; }
     }
 
-    #chatContainer {
+    #chatBox {
       position: fixed;
-      bottom: 120px;
+      bottom: 100px;
       right: 20px;
       width: 300px;
-      background: rgba(255, 255, 255, 0.8);
+      max-height: 350px;
+      background: rgba(255,255,255,0.85);
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       padding: 10px;
@@ -43,85 +44,97 @@
       z-index: 9998;
     }
 
-    #chatInput {
-      width: 100%;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    #chatMessages {
+    #messages {
       max-height: 200px;
       overflow-y: auto;
       margin-bottom: 10px;
       font-size: 14px;
     }
+
+    #inputBox {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .bubble {
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
+
   <div id="logoAI" title="Parler à Legacya"></div>
 
-  <div id="chatContainer">
-    <div id="chatMessages"></div>
-    <input type="text" id="chatInput" placeholder="Parlez ou écrivez..." />
+  <div id="chatBox">
+    <div id="messages"></div>
+    <input type="text" id="inputBox" placeholder="Écrivez ici ou parlez..." />
   </div>
 
   <script>
     const logo = document.getElementById('logoAI');
-    const chatContainer = document.getElementById('chatContainer');
-    const chatInput = document.getElementById('chatInput');
-    const chatMessages = document.getElementById('chatMessages');
+    const chatBox = document.getElementById('chatBox');
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('inputBox');
 
-    logo.addEventListener('click', () => {
-      chatContainer.style.display = 'block';
-      speak("Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.");
-      addMessage("👋 Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.");
-    });
+    let recognition;
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = 'fr-FR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
 
-    chatInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const msg = chatInput.value.trim();
+      recognition.onresult = function(event) {
+        const msg = event.results[0][0].transcript;
+        addMessage("👤 " + msg);
+        respond(msg);
+      };
+    }
+
+    logo.onclick = () => {
+      chatBox.style.display = 'block';
+      speak("Bonjour, je suis Legacya. Comment puis-je vous aider ?");
+      addMessage("🤖 Bonjour, je suis Legacya. Comment puis-je vous aider ?");
+      if (recognition) recognition.start();
+    };
+
+    input.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        const msg = input.value.trim();
         if (msg !== "") {
           addMessage("👤 " + msg);
           respond(msg);
-          chatInput.value = "";
+          input.value = "";
         }
       }
     });
 
+    function addMessage(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      div.className = 'bubble';
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
     function speak(text) {
       const speech = new SpeechSynthesisUtterance(text);
       const voices = speechSynthesis.getVoices();
-      const frenchVoice = voices.find(v => v.lang.includes('fr'));
-      if (frenchVoice) speech.voice = frenchVoice;
+      const french = voices.find(v => v.lang.includes('fr'));
+      if (french) speech.voice = french;
       speechSynthesis.speak(speech);
     }
 
-    function addMessage(text) {
-      const p = document.createElement('p');
-      p.textContent = text;
-      chatMessages.appendChild(p);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
     function respond(msg) {
-      const response = analyzeMessage(msg.toLowerCase());
+      const m = msg.toLowerCase();
+      let response = "Pouvez-vous reformuler ?";
+      if (m.includes("carte grise")) response = "Cliquez sur Carte grise / démarches.";
+      else if (m.includes("continuer")) response = "Appuyez sur le bouton bleu Continuer.";
+      else if (m.includes("conseiller")) response = "Choisissez Être recontacté par un conseiller.";
+      else if (m.includes("faire moi même")) response = "Parfait. Suivez les étapes du formulaire.";
       addMessage("🤖 " + response);
       speak(response);
-    }
-
-    function analyzeMessage(msg) {
-      if (msg.includes("carte grise")) {
-        return "Cliquez sur Carte grise / démarches, dans le menu en haut.";
-      } else if (msg.includes("continuer")) {
-        return "Appuyez sur le bouton bleu Continuer sur la page.";
-      } else if (msg.includes("recontacte") || msg.includes("conseiller")) {
-        return "Choisissez l'option pour être recontacté par un conseiller.";
-      } else if (msg.includes("faire moi même") || msg.includes("seul")) {
-        return "Parfait. Suivez les étapes pour compléter votre demande.";
-      } else {
-        return "D'accord, je vous accompagne. Continuez sur la page.";
-      }
     }
   </script>
 </body>
