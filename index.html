@@ -2,10 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Legacya IA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistant Legacya</title>
   <style>
     body {
       margin: 0;
+      font-family: Arial, sans-serif;
       background: transparent;
     }
 
@@ -15,46 +17,37 @@
       right: 20px;
       width: 80px;
       height: 80px;
-      background: url('https://img.icons8.com/ios-filled/100/ffffff/artificial-intelligence.png') no-repeat center/contain;
+      background: url('https://img.zebra-257800.hostingrctse.com/wp-content/uploads/2025/06/L.png') no-repeat center/contain;
       background-color: #000;
       border-radius: 50%;
-      cursor: pointer;
-      z-index: 9999;
       animation: pulse 2s infinite;
+      z-index: 9999;
+      cursor: pointer;
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
+  <div id="logoAI" onclick="startAssistant()"></div>
 
-<div id="logoAI" onclick="startLegacya()"></div>
+  <script>
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      const frVoice = voices.find(v => v.lang.includes("fr"));
+      if (frVoice) msg.voice = frVoice;
+      speechSynthesis.speak(msg);
+    }
 
-<script>
-  let started = false;
-
-  function startLegacya() {
-    if (started) return;
-    started = true;
-
-    const message = "Bonjour, je m'appelle Legacya. Je suis là pour vous aider dans vos démarches administratives liées à votre carte grise. Alors, si vous êtes partant, veuillez cliquer sur Carte grise pour commencer votre demande.";
-
-    const speech = new SpeechSynthesisUtterance(message);
-    speech.lang = 'fr-FR';
-    speech.pitch = 1;
-    speech.rate = 1;
-
-    const voices = window.speechSynthesis.getVoices();
-    const frenchMale = voices.find(v => v.lang === 'fr-FR' && v.name.toLowerCase().includes('h'));
-    if (frenchMale) speech.voice = frenchMale;
-
-    speechSynthesis.speak(speech);
-  }
-</script>
-
+    function startAssistant() {
+      speak("Bonjour, je suis Legacya. Je suis là pour vous aider dans votre démarche administrative de carte grise. Cliquez sur Carte grise et démarches. Alors si vous êtes partant, veuillez cliquer.");
+    }
+  </script>
 </body>
 </html>
+
