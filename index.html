@@ -2,103 +2,106 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <title>Legacya - Assistant Carte Grise</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legacya Assistant</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: transparent;
+    }
+
+    #assistantBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      border: none;
+      border-radius: 50%;
+      background: url('https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png') no-repeat center center;
+      background-size: contain;
+      animation: pulse 2s infinite;
+      z-index: 9999;
+      cursor: pointer;
+    }
+
+    #assistantBox {
+      position: fixed;
+      bottom: 120px;
+      right: 20px;
+      width: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+      color: white;
+      z-index: 9999;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 15px 10px rgba(255,255,255,0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+    }
+  </style>
 </head>
 <body>
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Message à Legacya, votre assistant administratif..." />
-    <button id="voiceButton" onclick="startAssistant()">
-      <img src="https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png" alt="IA" />
-    </button>
-  </div>
+  <button id="assistantBtn" title="Parler à Legacya"></button>
+  <div id="assistantBox">Bonjour, je suis Legacya. Je vais vous guider dans votre démarche. Cliquez sur "Carte grise / démarches" pour commencer.</div>
 
-  <div id="logoOverlay" onclick="hideOverlay()">
-    <img src="https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png" class="logo-pulse" />
-  </div>
+  <script>
+    const assistantBox = document.getElementById('assistantBox');
+    const assistantBtn = document.getElementById('assistantBtn');
 
-  <script src="script.js"></script>
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'fr-FR';
+      msg.pitch = 1;
+      msg.rate = 1;
+      const voices = speechSynthesis.getVoices();
+      msg.voice = voices.find(v => v.lang === 'fr-FR' && v.name.toLowerCase().includes('h')) || null;
+      speechSynthesis.speak(msg);
+    }
+
+    const steps = [
+      {
+        message: "Bonjour, je suis Legacya. Je vais vous guider dans votre démarche. Cliquez sur 'Carte grise / démarches' pour commencer.",
+        check: () => !window.location.href.includes('/immatriculation'),
+      },
+      {
+        message: "Maintenant cliquez sur le bouton bleu 'Continuer'.",
+        check: () => window.location.href.includes('/carte-grise'),
+      },
+      {
+        message: "Souhaitez-vous faire la demande vous-même ou être rappelé par un conseiller ?",
+        check: () => window.location.href.includes('/immatriculation'),
+      }
+    ];
+
+    let currentStep = 0;
+
+    function checkStep() {
+      if (currentStep >= steps.length) return;
+      const step = steps[currentStep];
+      if (step.check()) {
+        assistantBox.innerText = step.message;
+        speak(step.message);
+        currentStep++;
+      }
+    }
+
+    assistantBtn.addEventListener('click', () => {
+      assistantBox.style.display = 'block';
+      currentStep = 0;
+      checkStep();
+    });
+
+    // Vérifie si l'utilisateur change de page
+    setInterval(checkStep, 2000);
+  </script>
 </body>
 </html>
-body {
-  margin: 0;
-  background: #f5f5f5;
-  font-family: Arial, sans-serif;
-}
-
-.search-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20%;
-  gap: 10px;
-}
-
-#searchInput {
-  padding: 10px;
-  width: 300px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-#voiceButton {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-#voiceButton img {
-  width: 40px;
-  animation: pulse 2s infinite;
-}
-
-#logoOverlay {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.8);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10000;
-}
-
-.logo-pulse {
-  width: 150px;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
-}
-function speak(text) {
-  const msg = new SpeechSynthesisUtterance(text);
-  msg.lang = "fr-FR";
-  msg.pitch = 1;
-  msg.rate = 1;
-
-  const voices = speechSynthesis.getVoices();
-  const male = voices.find(v => v.lang === "fr-FR" && v.name.toLowerCase().includes("h"));
-  if (male) msg.voice = male;
-
-  speechSynthesis.speak(msg);
-}
-
-function startAssistant() {
-  const overlay = document.getElementById("logoOverlay");
-  overlay.style.display = "flex";
-
-  speak("Bonjour, bienvenue chez Legacy Office. Je suis votre assistant pour vous accompagner dans vos démarches administratives. Quelle est votre demande ?");
-  
-  // TODO : Ajout reconnaissance vocale si besoin ici
-}
-
-function hideOverlay() {
-  document.getElementById("logoOverlay").style.display = "none";
-}
