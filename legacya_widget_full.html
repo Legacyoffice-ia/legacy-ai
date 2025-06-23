@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Legacya</title>
+  <title>Assistant Legacya</title>
   <style>
     body {
       margin: 0;
@@ -29,10 +29,100 @@
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.1); opacity: 0.8; }
     }
+
+    #chatContainer {
+      position: fixed;
+      bottom: 120px;
+      right: 20px;
+      width: 300px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      padding: 10px;
+      display: none;
+      z-index: 9998;
+    }
+
+    #chatInput {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #chatMessages {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <div id="logoAI" title="Parler à Legacya"></div>
+
+  <div id="chatContainer">
+    <div id="chatMessages"></div>
+    <input type="text" id="chatInput" placeholder="Parlez ou écrivez..." />
+  </div>
+
+  <script>
+    const logo = document.getElementById('logoAI');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatInput = document.getElementById('chatInput');
+    const chatMessages = document.getElementById('chatMessages');
+
+    logo.addEventListener('click', () => {
+      chatContainer.style.display = 'block';
+      speak("Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.");
+      addMessage("👋 Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.");
+    });
+
+    chatInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const msg = chatInput.value.trim();
+        if (msg !== "") {
+          addMessage("👤 " + msg);
+          respond(msg);
+          chatInput.value = "";
+        }
+      }
+    });
+
+    function speak(text) {
+      const speech = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      const frenchVoice = voices.find(v => v.lang.includes('fr'));
+      if (frenchVoice) speech.voice = frenchVoice;
+      speechSynthesis.speak(speech);
+    }
+
+    function addMessage(text) {
+      const p = document.createElement('p');
+      p.textContent = text;
+      chatMessages.appendChild(p);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function respond(msg) {
+      const response = analyzeMessage(msg.toLowerCase());
+      addMessage("🤖 " + response);
+      speak(response);
+    }
+
+    function analyzeMessage(msg) {
+      if (msg.includes("carte grise")) {
+        return "Cliquez sur Carte grise / démarches, dans le menu en haut.";
+      } else if (msg.includes("continuer")) {
+        return "Appuyez sur le bouton bleu Continuer sur la page.";
+      } else if (msg.includes("recontacte") || msg.includes("conseiller")) {
+        return "Choisissez l'option pour être recontacté par un conseiller.";
+      } else if (msg.includes("faire moi même") || msg.includes("seul")) {
+        return "Parfait. Suivez les étapes pour compléter votre demande.";
+      } else {
+        return "D'accord, je vous accompagne. Continuez sur la page.";
+      }
+    }
+  </script>
 </body>
 </html>
-
