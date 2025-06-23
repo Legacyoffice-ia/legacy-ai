@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legacya Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Message à Legacya, votre assistant administratif..." />
+    <button id="voiceButton" onclick="startAssistant()">
+      <img src="https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png" alt="IA" />
+    </button>
+  </div>
+
+  <div id="logoOverlay" onclick="hideOverlay()">
+    <img src="https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png" class="logo-pulse" />
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+body {
+  margin: 0;
+  background: #f5f5f5;
+  font-family: Arial, sans-serif;
+}
+
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20%;
+  gap: 10px;
+}
+
+#searchInput {
+  padding: 10px;
+  width: 300px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#voiceButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+#voiceButton img {
+  width: 40px;
+  animation: pulse 2s infinite;
+}
+
+#logoOverlay {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+}
+
+.logo-pulse {
+  width: 150px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+function speak(text) {
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "fr-FR";
+  msg.pitch = 1;
+  msg.rate = 1;
+
+  const voices = speechSynthesis.getVoices();
+  const male = voices.find(v => v.lang === "fr-FR" && v.name.toLowerCase().includes("h"));
+  if (male) msg.voice = male;
+
+  speechSynthesis.speak(msg);
+}
+
+function startAssistant() {
+  const overlay = document.getElementById("logoOverlay");
+  overlay.style.display = "flex";
+
+  speak("Bonjour, bienvenue chez Legacy Office. Je suis votre assistant pour vous accompagner dans vos démarches administratives. Quelle est votre demande ?");
+  
+  // TODO : Ajout reconnaissance vocale si besoin ici
+}
+
+function hideOverlay() {
+  document.getElementById("logoOverlay").style.display = "none";
+}
