@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assistant Legacya Complet</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+    }
+    #aiWidget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 350px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      color: white;
+      font-family: sans-serif;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 9999;
+    }
+    #aiWidget strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    #aiInput {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      outline: none;
+      color: white;
+      min-height: 50px;
+    }
+    #aiInput:empty:before {
+      content: 'Parlez ou écrivez ici...';
+      color: rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<div id="aiWidget">
+  <strong>Legacya vous écoute...</strong>
+  <div id="aiInput" contenteditable="true"></div>
+</div>
+
+<script>
+  const chatBox = document.getElementById("aiInput");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  let étapes = [
+    { question: "Bonjour, je suis Legacya. Cliquez sur 'Carte grise / démarches' dans le menu.", clé: "démarches" },
+    { question: "Très bien. Maintenant, cliquez sur le bouton bleu 'Continuer'.", clé: "continuer" },
+    { question: "Souhaitez-vous faire la démarche vous-même ou qu’un conseiller vous rappelle ?", clé: "moi-même conseiller" },
+    { question: "Merci. Je vous accompagne pour finaliser la demande.", clé: "" }
+  ];
+  let indexÉtape = 0;
+
+  function speak(text) {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "fr-FR";
+    const voices = window.speechSynthesis.getVoices();
+    const male = voices.find(v => v.lang === 'fr-FR' && v.name.toLowerCase().includes("h"));
+    if (male) msg.voice = male;
+    window.speechSynthesis.speak(msg);
+  }
+
+  function avancerDialogue(reponse) {
+    const clé = étapes[indexÉtape].clé;
+    if (clé && clé.split(" ").some(mot => reponse.toLowerCase().includes(mot))) {
+      indexÉtape++;
+    }
+    if (étapes[indexÉtape]) {
+      chatBox.innerText = étapes[indexÉtape].question;
+      speak(étapes[indexÉtape].question);
+    }
+  }
+
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = "fr-FR";
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+      const result = event.results[event.results.length - 1][0].transcript.trim();
+      chatBox.innerText = result;
+      avancerDialogue(result);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Erreur vocale :", event.error);
+    };
+
+    recognition.start();
+  }
+
+  chatBox.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      avancerDialogue(chatBox.innerText.trim());
+    }
+  });
+
+  // Lancer intro au chargement
+  window.onload = () => {
+    speak(étapes[0].question);
+    chatBox.innerText = étapes[0].question;
+  };
+</script>
+
+</body>
+</html>
