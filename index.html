@@ -1,107 +1,91 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Legacya - Assistant Carte Grise</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: transparent;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Assistant Legacya</title>
+<style>
+body {
+margin: 0;
+font-family: Arial, sans-serif;
+background: url('https://your-background-image.jpg') no-repeat center center fixed;
+background-size: cover;
+}
 
-    #assistantBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 80px;
-      height: 80px;
-      border: none;
-      border-radius: 50%;
-      background: url('https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png') no-repeat center center;
-      background-size: contain;
-      animation: pulse 2s infinite;
-      z-index: 9999;
-      cursor: pointer;
-    }
+#logoAI {
+position: fixed;
+bottom: 20px;
+right: 20px;
+width: 80px;
+height: 80px;
+background: url('https://lime-zebra-257030.hostingersite.com/wp-content/uploads/2025/06/L.png') no-repeat center;
+background-size: contain;
+border-radius: 50%;
+animation: pulse 2s infinite;
+z-index: 9999;
+cursor: pointer;
+}
 
-    #assistantBox {
-      position: fixed;
-      bottom: 120px;
-      right: 20px;
-      width: 300px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 8px;
-      display: none;
-      color: white;
-      z-index: 9999;
-    }
+@keyframes pulse {
+0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+70% { transform: scale(1.1); box-shadow: 0 0 15px 10px rgba(255, 255, 255, 0); }
+100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
 
-    @keyframes pulse {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-      70% { transform: scale(1.05); box-shadow: 0 0 15px 10px rgba(255,255,255,0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-    }
-  </style>
+#messageBox {
+position: fixed;
+bottom: 110px;
+right: 20px;
+width: 300px;
+padding: 15px;
+background: rgba(0, 0, 0, 0.6);
+color: white;
+border-radius: 10px;
+font-size: 14px;
+display: none;
+z-index: 9999;
+}
+</style>
 </head>
 <body>
-  <button id="assistantBtn" title="Parler à Legacya"></button>
-  <div id="assistantBox">Bonjour, je suis Legacya. Je vais vous guider dans votre démarche. Cliquez sur "Carte grise / démarches" pour commencer.</div>
 
-  <script>
-    const assistantBox = document.getElementById('assistantBox');
-    const assistantBtn = document.getElementById('assistantBtn');
+<div id="logoAI" title="Cliquez pour parler à Legacya"></div>
+<div id="messageBox"></div>
 
-    function speak(text) {
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = 'fr-FR';
-      msg.pitch = 1;
-      msg.rate = 1;
-      const voices = speechSynthesis.getVoices();
-      msg.voice = voices.find(v => v.lang === 'fr-FR' && v.name.toLowerCase().includes('h')) || null;
-      speechSynthesis.speak(msg);
-    }
+<script>
+const phrases = [
+"Bonjour, je suis Legacya, votre assistant pour les démarches de carte grise.",
+"Commencez en cliquant sur 'Carte grise / démarches' dans le menu.",
+"Cliquez ensuite sur 'Continuer' sur la page suivante.",
+"Souhaitez-vous faire la démarche vous-même ou être recontacté par un conseiller ?"
+];
 
-    const steps = [
-      {
-        message: "Bonjour, je suis Legacya. Je vais vous guider dans votre démarche. Cliquez sur 'Carte grise / démarches' pour commencer.",
-        check: () => !window.location.href.includes('/immatriculation'),
-      },
-      {
-        message: "Maintenant cliquez sur le bouton bleu 'Continuer'.",
-        check: () => window.location.href.includes('/carte-grise'),
-      },
-      {
-        message: "Souhaitez-vous faire la demande vous-même ou être rappelé par un conseiller ?",
-        check: () => window.location.href.includes('/immatriculation'),
-      }
-    ];
+let currentStep = 0;
+const logo = document.getElementById("logoAI");
+const box = document.getElementById("messageBox");
 
-    let currentStep = 0;
+function speak(text) {
+const msg = new SpeechSynthesisUtterance(text);
+msg.lang = "fr-FR";
+const voices = window.speechSynthesis.getVoices();
+const maleVoice = voices.find(v => v.lang === "fr-FR" && v.name.toLowerCase().includes("h"));
+if (maleVoice) msg.voice = maleVoice;
+window.speechSynthesis.speak(msg);
+}
 
-    function checkStep() {
-      if (currentStep >= steps.length) return;
-      const step = steps[currentStep];
-      if (step.check()) {
-        assistantBox.innerText = step.message;
-        speak(step.message);
-        currentStep++;
-      }
-    }
+function showNextMessage() {
+if (currentStep < phrases.length) {
+const message = phrases[currentStep];
+box.style.display = "block";
+box.innerText = message;
+speak(message);
+currentStep++;
+}
+}
 
-    assistantBtn.addEventListener('click', () => {
-      assistantBox.style.display = 'block';
-      currentStep = 0;
-      checkStep();
-    });
+logo.addEventListener("click", showNextMessage);
+</script>
 
-    // Vérifie si l'utilisateur change de page
-    setInterval(checkStep, 2000);
-  </script>
 </body>
 </html>
+
